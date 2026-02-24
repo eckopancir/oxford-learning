@@ -59,7 +59,8 @@ body {
   /* Текст и границы */
   color: var(--primary-green);
   border: 1px solid rgba(0, 255, 128, 0.3);
-  padding: 10px 35px 10px 15px; /* Увеличили отступ справа для стрелочки */
+  padding: 10px 35px 10px 15px;
+  /* Увеличили отступ справа для стрелочки */
 
   font-family: inherit;
   font-size: 13px;
@@ -94,7 +95,8 @@ body {
 
 /* Стилизация выпадающих пунктов (работает в Chrome/Edge) */
 .glass-select option {
-  background: #0d1117; /* Темный фон для списка, т.к. blur в выпадающем окне не работает */
+  background: #0d1117;
+  /* Темный фон для списка, т.к. blur в выпадающем окне не работает */
   color: var(--primary-green);
   padding: 10px;
 }
@@ -160,8 +162,10 @@ body {
 .cyber-table td {
   padding: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  position: relative; /* ВАЖНО: теперь подсказка будет внутри ячейки */
+  position: relative;
+  /* ВАЖНО: теперь подсказка будет внутри ячейки */
 }
+
 /* --- ПОЛНАЯ НЕОНОВАЯ ПОДСВЕТКА РЯДА --- */
 .cyber-table tbody tr {
   transition: all 0.25s ease;
@@ -180,7 +184,8 @@ body {
 .cyber-table tbody tr:hover td {
   border-top-color: rgba(0, 255, 128, 0.3);
   border-bottom-color: rgba(0, 255, 128, 0.3);
-  color: #ffffff; /* Текст становится ярче */
+  color: #ffffff;
+  /* Текст становится ярче */
 }
 
 /* Делаем крайние границы (лево и право) ярче для эффекта закрытого контура */
@@ -191,13 +196,15 @@ body {
 .cyber-table tbody tr:hover td:last-child {
   border-right: 2px solid var(--primary-green);
 }
+
 /* Ячейка английского слова */
 .main-word {
   font-weight: bold;
   font-size: 16px;
   color: #fff;
   cursor: pointer;
-  text-decoration: none; /* Убрали пунктир */
+  text-decoration: none;
+  /* Убрали пунктир */
   transition: color 0.2s;
 }
 
@@ -233,13 +240,15 @@ body {
 /* Контейнер для слова в карточке повторения и в таблице */
 .main-word,
 .review-display-wrapper {
-  position: relative; /* Чтобы подсказка позиционировалась относительно слова */
+  position: relative;
+  /* Чтобы подсказка позиционировалась относительно слова */
   display: inline-block;
 }
 
 .custom-tooltip {
   position: absolute;
-  bottom: 120%; /* Чуть выше над словом */
+  bottom: 120%;
+  /* Чуть выше над словом */
   left: 50%;
   transform: translateX(-50%);
   background: rgba(11, 133, 66, 0.95);
@@ -247,9 +256,11 @@ body {
   padding: 8px 15px;
   border-radius: 8px;
   z-index: 9999;
-  pointer-events: none; /* КРИТИЧЕСКИ ВАЖНО: мышь "пролетает" сквозь подсказку */
+  pointer-events: none;
+  /* КРИТИЧЕСКИ ВАЖНО: мышь "пролетает" сквозь подсказку */
   display: none;
-  white-space: normal; /* Если подсказка длинная, она перенесется */
+  white-space: normal;
+  /* Если подсказка длинная, она перенесется */
   min-width: 100px;
   text-align: center;
 }
@@ -388,19 +399,28 @@ body {
 .correct-count {
   right: 20px;
 }
+
 #availableQuestionsCount {
   left: 20px;
 }
+
 /* --- СЕКЦИЯ КНОПОК --- */
 .button-row {
   display: flex;
-  flex-direction: row; /* Строго в ряд */
-  justify-content: center; /* Центрируем в панели */
-  align-items: center; /* Ровняем по вертикали */
-  gap: 15px; /* Отступ между кнопками */
-  width: 100%; /* Растягиваем на всю ширину панели */
-  margin-top: 10px; /* Небольшой отступ от фильтров */
+  flex-direction: row;
+  /* Строго в ряд */
+  justify-content: center;
+  /* Центрируем в панели */
+  align-items: center;
+  /* Ровняем по вертикали */
+  gap: 15px;
+  /* Отступ между кнопками */
+  width: 100%;
+  /* Растягиваем на всю ширину панели */
+  margin-top: 10px;
+  /* Небольшой отступ от фильтров */
 }
+
 /* Контейнер для картинки внутри карточки */
 .card-image-bg {
   position: absolute;
@@ -408,19 +428,24 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0; /* Чтобы быть за текстом */
+  z-index: 0;
+  /* Чтобы быть за текстом */
   background-size: cover;
   background-position: center;
-  filter: brightness(0.5); /* Чтобы текст был читаемым */
+  filter: brightness(0.5);
+  /* Чтобы текст был читаемым */
   transition: opacity 0.8s ease;
-  opacity: 0.6; /* Делаем градиент мягче, чтобы текст читался */
+  opacity: 0.6;
+  /* Делаем градиент мягче, чтобы текст читался */
 }
 
 .review-card {
   position: relative;
-  overflow: hidden; /* Чтобы картинка не вылезала */
+  overflow: hidden;
+  /* Чтобы картинка не вылезала */
   border: 2px solid var(--primary-green) !important;
-  background: rgba(10, 10, 15, 0.7) !important; /* Делаем фон прозрачнее */
+  background: rgba(10, 10, 15, 0.7) !important;
+  /* Делаем фон прозрачнее */
   box-shadow: 0 0 40px rgba(0, 255, 128, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.5);
   z-index: 1;
 }
@@ -429,15 +454,19 @@ body {
 .review-card[data-level='1'] {
   border-color: #888 !important;
 }
+
 .review-card[data-level='2'] {
   border-color: #00ff80 !important;
 }
+
 .review-card[data-level='3'] {
   border-color: #00f2fe !important;
 }
+
 .review-card[data-level='4'] {
   border-color: #ff00c1 !important;
 }
+
 /* Стили для карточки повторения */
 .review-card {
   background: rgba(255, 255, 255, 0.05);
@@ -450,12 +479,14 @@ body {
   position: relative;
   box-shadow: 0 0 30px rgba(0, 255, 128, 0.1);
 }
+
 #card-bg {
   position: absolute;
   inset: 0;
   z-index: -1;
   background: #020205;
-  perspective: 800px; /* Смягчаем перспективу */
+  perspective: 800px;
+  /* Смягчаем перспективу */
   overflow: hidden;
 }
 
@@ -490,6 +521,7 @@ body {
   from {
     transform: rotateX(65deg) translateY(0);
   }
+
   to {
     transform: rotateX(65deg) translateY(60px);
   }
@@ -499,15 +531,15 @@ body {
 .cyber-nebula {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-      circle at var(--px) var(--py),
+  background: radial-gradient(circle at var(--px) var(--py),
       var(--main-color-trans) 0%,
-      transparent 70%
-    ),
+      transparent 70%),
     radial-gradient(circle at var(--sx) var(--sy), var(--alt-color-trans) 0%, transparent 60%);
-  filter: blur(50px); /* Максимальная мягкость */
+  filter: blur(50px);
+  /* Максимальная мягкость */
   opacity: 0.6;
 }
+
 .level-indicator {
   position: absolute;
   top: 15px;
@@ -527,7 +559,8 @@ body {
   color: #000;
   width: 45px;
   height: 45px;
-  border-radius: 50%; /* Делаем круглыми */
+  border-radius: 50%;
+  /* Делаем круглыми */
   font-weight: bold;
   font-size: 16px;
   cursor: pointer;
@@ -553,13 +586,15 @@ body {
   align-items: center;
   border-style: solid !important;
 }
+
 /* Бейдж уровня в карточке */
 .level-badge {
   display: inline-block;
   background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
   color: #000;
   padding: 3px 15px;
-  border-radius: 20px; /* Округлый стиль */
+  border-radius: 20px;
+  /* Округлый стиль */
   font-weight: 800;
   font-size: 0.85rem;
   letter-spacing: 1px;
@@ -581,6 +616,7 @@ body {
   background: rgba(10, 10, 15, 0.9) !important;
   backdrop-filter: blur(10px);
 }
+
 /* Кнопка повторной озвучки в карточке */
 .review-audio-btn {
   background: rgba(0, 255, 128, 0.05);
@@ -603,6 +639,7 @@ body {
   box-shadow: 0 0 20px var(--primary-green);
   transform: scale(1.1);
 }
+
 /* Анимация появления слова */
 @keyframes cyberFade {
   from {
@@ -610,12 +647,14 @@ body {
     transform: scale(0.95);
     filter: blur(10px);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
     filter: blur(0);
   }
 }
+
 .stats-top-bar {
   display: flex;
   flex-wrap: wrap;
@@ -661,6 +700,7 @@ body {
   color: rgba(255, 255, 255, 0.2);
   align-self: center;
 }
+
 /* Контейнер журнала */
 .journal-table th:hover {
   background: #00ff41;
@@ -668,12 +708,14 @@ body {
   text-shadow: none;
   box-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
 }
+
 /* Подсветка строк при наведении */
 .journal-table tr:hover td {
   background: rgba(0, 255, 65, 0.03);
   color: #fff;
   transition: 0.2s;
 }
+
 /* Эффект "стекла" для самого контейнера журнала */
 #journal-container {
   margin-top: 20px;
@@ -682,7 +724,8 @@ body {
   background: rgba(32, 32, 39, 0.132);
   border: 1px solid rgba(0, 255, 65, 0.2);
   box-shadow: 0 0 30px rgba(0, 0, 0, 1);
-  scrollbar-width: thin; /* Для Firefox */
+  scrollbar-width: thin;
+  /* Для Firefox */
   scrollbar-color: #00ff41 #020205;
 }
 
@@ -691,28 +734,35 @@ body {
   border-collapse: collapse;
   font-size: 0.85rem;
 }
+
 /* --- КИБЕР-СКРОЛЛБАР (Для всей страницы и таблиц) --- */
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: #020205;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #00ff41; /* Тот самый зеленый неон */
+  background: #00ff41;
+  /* Тот самый зеленый неон */
   border-radius: 10px;
   box-shadow: 0 0 10px #00ff41, inset 0 0 5px rgba(0, 0, 0, 0.5);
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #008f11;
 }
+
 /* --- ОФОРМЛЕНИЕ ШАПКИ ЖУРНАЛА --- */
 .journal-table th {
   position: sticky;
   top: 0;
   z-index: 10;
   background: #16161f2d;
-  color: #00ff41; /* Зеленый текст */
+  color: #00ff41;
+  /* Зеленый текст */
   padding: 15px 10px;
   text-transform: uppercase;
   font-size: 0.75rem;
@@ -745,6 +795,7 @@ body {
   font-size: 0.75rem;
   color: #000;
 }
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -759,8 +810,10 @@ body {
 
 .modal-content {
   background: rgba(41, 41, 49, 0.509);
-  backdrop-filter: blur(15px) saturate(150%); /* Размывает всё, что ПОД модалкой */
-  -webkit-backdrop-filter: blur(15px) saturate(150%); /* Для Safari */
+  backdrop-filter: blur(15px) saturate(150%);
+  /* Размывает всё, что ПОД модалкой */
+  -webkit-backdrop-filter: blur(15px) saturate(150%);
+  /* Для Safari */
 
   padding: 30px;
   border: 1px solid #00ff41;
@@ -792,4 +845,307 @@ body {
 .modal-options .glass-button {
   font-size: 0.8rem;
   padding: 10px 5px;
+}
+
+/* --- НОВЫЕ РЕЖИМЫ (Match Mode, Spelling Bee) --- */
+.game-screen {
+  display: none;
+  text-align: center;
+  margin-top: 30px;
+}
+
+.match-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.match-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.match-card {
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 128, 0.2);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  font-size: 1.1rem;
+}
+
+.match-card:hover {
+  background: rgba(0, 255, 128, 0.1);
+  border-color: var(--primary-green);
+}
+
+.match-card.selected {
+  border-color: #00f2fe;
+  background: rgba(0, 242, 254, 0.1);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+}
+
+.match-card.matched {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8);
+}
+
+.match-card.wrong {
+  border-color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.1);
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.spelling-card {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 40px;
+  background: rgba(10, 10, 15, 0.8);
+  border: 1px solid var(--primary-green);
+  border-radius: 8px;
+  box-shadow: 0 0 30px rgba(0, 255, 128, 0.1);
+}
+
+.spelling-input {
+  width: 100%;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 128, 0.3);
+  color: var(--primary-green);
+  font-family: inherit;
+  font-size: 1.5rem;
+  text-align: center;
+  outline: none;
+  margin: 20px 0;
+  text-transform: lowercase;
+}
+
+.spelling-input:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 15px rgba(0, 255, 128, 0.2);
+}
+
+/* --- ПОИСК И БЭКАП --- */
+.journal-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 20px;
+}
+
+.search-input {
+  flex-grow: 1;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 128, 0.3);
+  color: #fff;
+  font-family: inherit;
+  border-radius: 4px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 10px rgba(0, 255, 128, 0.2);
+}
+
+.backup-btn {
+  font-size: 0.8rem !important;
+  padding: 8px 15px !important;
+  border-color: #00f2fe !important;
+  color: #00f2fe !important;
+}
+
+.stat-banner.streak {
+  border-color: #ff00c1;
+  color: #ff00c1;
+  text-shadow: 0 0 5px rgba(255, 0, 193, 0.5);
+}
+
+/* --- АДАПТИВНОСТЬ --- */
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 15px;
+    margin: 10px auto;
+  }
+
+  .nav-header {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .glass-button {
+    padding: 8px 12px;
+    font-size: 11px;
+    flex: 1 1 30%;
+    min-width: 80px;
+  }
+
+  #setup-panel {
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+    padding: 15px;
+  }
+
+  .filter-group {
+    flex-direction: column;
+  }
+
+  .cyber-table {
+    display: block;
+    overflow-x: auto;
+    font-size: 0.8rem;
+  }
+
+  .main-word {
+    font-size: 1.2rem;
+  }
+
+  .stats-top-bar {
+    font-size: 8px;
+    padding: 5px;
+    flex-wrap: wrap;
+  }
+}
+
+/* --- КНОПКА ЗАВЕРШЕНИЯ (Серый крестик) --- */
+.finish-btn {
+  background: transparent;
+  border: 1px solid #555;
+  color: #555;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: 5px;
+  transition: all 0.2s;
+  font-size: 0.8rem;
+}
+
+.finish-btn:hover {
+  background: #ff4d4d;
+  color: white;
+  border-color: #ff4d4d;
+}
+
+/* --- ЖУРНАЛ: ВКЛАДКИ --- */
+.journal-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+/* --- ПУЛ MATCH --- */
+.match-pool-counter {
+  background: rgba(0, 242, 254, 0.1);
+  color: #00f2fe;
+  padding: 10px;
+  border: 1px dashed #00f2fe;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  display: none;
+}
+
+/* --- ТАЙМЕР --- */
+.timer-pulse {
+  animation: timer-pulse 0.5s infinite alternate;
+}
+
+@keyframes timer-pulse {
+  from {
+    color: #ffaa00;
+    transform: scale(1);
+  }
+
+  to {
+    color: #ff4d4d;
+    transform: scale(1.1);
+  }
+}
+
+.status-cell-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.match-message {
+  min-height: 24px;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  text-shadow: 0 0 10px currentColor;
+  transition: all 0.3s;
+}
+
+/* --- GUIDE MODAL --- */
+.guide-content {
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.guide-section {
+  margin-bottom: 25px;
+  border-left: 3px solid var(--primary-green);
+  padding-left: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.guide-section h3 {
+  color: var(--primary-green);
+  margin-top: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.guide-key {
+  color: #ffaa00;
+  font-weight: bold;
+}
+
+.dont-show-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.dont-show-container input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
 }

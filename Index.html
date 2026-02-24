@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oxford 5000 | Cyber Learning</title>
+  <link rel="stylesheet" href="stylewords.css" />
+</head>
+
+<body>
+  <div class="stats-top-bar">
+    <div class="stat-banner"><span class="label">A1:</span> <span id="stat-a1">0</span></div>
+    <div class="stat-banner"><span class="label">A2:</span> <span id="stat-a2">0</span></div>
+    <div class="stat-banner"><span class="label">B1:</span> <span id="stat-b1">0</span></div>
+    <div class="stat-banner"><span class="label">B2:</span> <span id="stat-b2">0</span></div>
+    <div class="stat-banner"><span class="label">C1:</span> <span id="stat-c1">0</span></div>
+
+    <div class="divider">|</div>
+
+    <div class="stat-banner highlighting" title="Доступно новых слов для изучения">
+      <span class="label">AVAIL LEARN:</span> <span id="stat-avail-learn">0</span>
+    </div>
+    <div class="stat-banner highlighting" title="Повторение: Английский -> Русский">
+      <span class="label">REV EN-RU:</span> <span id="stat-avail-eng">0</span>
+    </div>
+    <div class="stat-banner highlighting" title="Повторение: Русский -> Английский">
+      <span class="label">REV RU-EN:</span> <span id="stat-avail-rus">0</span>
+    </div>
+
+    <div class="divider">|</div>
+
+    <div class="stat-banner highlighting">
+      <span class="label">TODAY NEW:</span> <span id="stat-today-new">0</span>
+    </div>
+    <div class="stat-banner highlighting">
+      <span class="label">REVIEWS:</span> <span id="stat-today-rev">0</span>
+    </div>
+
+    <div class="divider">|</div>
+
+    <div class="stat-banner record">
+      <span class="label">WEEK BEST:</span> <span id="stat-week-record">0</span>
+    </div>
+    <div class="stat-banner record">
+      <span class="label">TOTAL:</span> <span id="learned-stat">0</span>
+    </div>
+    <div class="stat-banner streak" title="Ударный режим (дни без пропусков)">
+      <span class="label">STREAK:</span> <span id="stat-streak">0</span> 🔥
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="nav-header">
+      <button class="glass-button active" onclick="switchScreen('setup-panel')">Изучение</button>
+      <button class="glass-button" onclick="showReviewOptions()">Изученные</button>
+      <button class="glass-button" onclick="startMatchMode()">Match</button>
+      <button class="glass-button" onclick="showJournal()">Журнал</button>
+    </div>
+    <div id="journal-screen" style="display: none">
+      <div class="journal-tabs">
+        <button id="tab-learned" class="glass-button active" onclick="setJournalTab('learned')">Изученные</button>
+        <button id="tab-finished" class="glass-button" onclick="setJournalTab('finished')">Завершенные</button>
+      </div>
+      <div id="journal-mode-selector-box" class="journal-mode-selector" style="
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+          ">
+        <button id="j-mode-eng" class="glass-button active" onclick="setJournalMode('eng')">
+          EN ➔ RU Progress
+        </button>
+        <button id="j-mode-rus" class="glass-button" onclick="setJournalMode('rus')">
+          RU ➔ EN Progress
+        </button>
+      </div>
+      <div class="journal-controls">
+        <input type="text" id="journal-search" class="search-input" placeholder="Поиск слова или перевода..."
+          oninput="renderJournal()">
+        <div style="display:flex; gap:10px;">
+          <button class="glass-button backup-btn" onclick="downloadBackup()">💾 BACKUP JSON</button>
+          <button class="glass-button backup-btn" style="border-color:#ff00c1 !important; color:#ff00c1 !important;"
+            onclick="document.getElementById('import-file').click()">📂 RESTORE JSON</button>
+          <input type="file" id="import-file" style="display:none" accept=".json" onchange="restoreBackup(event)">
+        </div>
+      </div>
+      <div id="journal-container">
+        <table class="journal-table">
+          <thead>
+            <tr id="journal-header">
+              <th onclick="sortJournal('word')">🔤 Слово</th>
+              <th onclick="sortJournal('level')">📊 Уровень</th>
+              <th onclick="sortJournal('views')">👁 Просмотры</th>
+              <th onclick="sortJournal('days')">📅 Дней</th>
+              <th onclick="sortJournal('score0')">0</th>
+              <th onclick="sortJournal('score1')">1</th>
+              <th onclick="sortJournal('score2')">2</th>
+              <th onclick="sortJournal('score3')">3</th>
+              <th onclick="sortJournal('score4')">4</th>
+              <th onclick="sortJournal('diff')">📈 Прогресс</th>
+              <th>🕒 Статус</th>
+            </tr>
+          </thead>
+          <tbody id="journal-grid"></tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      function showReviewOptions() {
+        // Показываем наше модальное окно (оно уже есть в HTML)
+        const modal = document.getElementById('review-modal');
+        if (modal) {
+          modal.style.display = 'flex';
+        } else {
+          // Фолбэк на старые confirm если модала нет
+          const mode = confirm('Выберите направление:\nOK — EN -> RU\nОтмена — RU -> EN');
+          const sortMode = confirm('Выберите порядок:\nOK — Случайно\nОтмена — По уровням');
+          startReview(mode ? 'eng-rus' : 'rus-eng', sortMode ? 'random' : 'level');
+        }
+      }
+    </script>
+    <div class="button-row">
+      <div id="setup-panel">
+        <div class="filter-group">
+          <select id="filter-level" class="glass-select">
+            <option value="all">Все уровни (A1-C1)</option>
+            <option value="A1">Level A1</option>
+            <option value="A2">Level A2</option>
+            <option value="B1">Level B1</option>
+            <option value="B2">Level B2</option>
+            <option value="C1">Level C1</option>
+          </select>
+
+          <select id="filter-type" class="glass-select">
+            <option value="all">Все части речи</option>
+            <option value="v.">Глаголы (v.)</option>
+            <option value="n.">Существительные (n.)</option>
+            <option value="adj.">Прилагательные (adj.)</option>
+            <option value="adv.">Наречия (adv.)</option>
+          </select>
+        </div>
+
+        <button class="glass-button start-btn" onclick="generateNewList()">
+          Сформировать список (20)
+        </button>
+        <button class="glass-button shuffle-btn" onclick="shuffleCurrentList()">
+          Перемешать текущие
+        </button>
+      </div>
+      <div id="tooltip" class="custom-tooltip"></div>
+    </div>
+
+    <div id="table-container" style="display: none">
+      <table class="cyber-table">
+        <thead>
+          <tr>
+            <th style="width: 40px">№</th>
+            <th>Слово</th>
+            <th>Транскрипция</th>
+            <th>Перевод</th>
+            <th style="width: 60px">Звук</th>
+            <th style="width: 80px">Словарь</th>
+            <th style="width: 60px">Статус</th>
+          </tr>
+        </thead>
+        <tbody id="words-grid"></tbody>
+      </table>
+    </div>
+    <div id="review-container" style="display: none; text-align: center; margin-top: 50px">
+      <div class="review-card">
+        <div id="review-mode-badge" style="
+              font-size: 0.7rem;
+              color: #4facfe;
+              letter-spacing: 2px;
+              margin-bottom: 5px;
+              text-transform: uppercase;
+              font-weight: bold;
+            "></div>
+
+        <div id="review-level-tag" class="level-badge">LVL 1</div>
+
+        <div class="review-display-wrapper" style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 15px;
+              margin-top: 10px;
+            ">
+          <div id="review-word-display" class="main-word" style="font-size: 3.5rem; position: relative; cursor: help">
+            Word
+          </div>
+          <button class="audio-icon review-audio-btn" id="review-replay-audio" onclick="replayCurrentAudio()"
+            style="font-size: 2rem; display: none">
+            🔊
+          </button>
+        </div>
+        <div id="review-phonetic" style="color: #888; margin-bottom: 10px; font-family: monospace">
+          [phonetic]
+        </div>
+
+        <div id="review-translation" class="translation-cell"
+          style="display: none; font-size: 1.8rem; margin: 25px 0; color: #00f2fe">
+          Перевод
+        </div>
+
+        <div class="review-controls">
+          <button id="show-answer-btn" class="glass-button start-btn" onclick="showReviewAnswer()">
+            Показать ответ
+          </button>
+
+          <div id="rating-buttons" style="display: none; gap: 12px; justify-content: center; margin-top: 25px">
+            <button onclick="rateWord(0)" style="background: #ff4d4d" class="rate-btn">0</button>
+            <button onclick="rateWord(1)" style="background: #ffa500" class="rate-btn">1</button>
+            <button onclick="rateWord(2)" style="background: #ffff00; color: black" class="rate-btn">
+              2
+            </button>
+            <button onclick="rateWord(3)" style="background: #90ee90; color: black" class="rate-btn">
+              3
+            </button>
+            <button onclick="rateWord(4)" style="background: #006400" class="rate-btn">4</button>
+          </div>
+        </div>
+      </div>
+      <button class="glass-button" style="margin-top: 40px" onclick="location.reload()">
+        Назад к списку
+      </button>
+    </div>
+
+    <!-- MATCH MODE SCREEN -->
+    <div id="match-screen" class="game-screen">
+      <h2 style="color: #00f2fe; margin-bottom: 10px;">MATCH MODE</h2>
+      <div id="match-pool-info" class="match-pool-counter">Слов в пуле: 0 / 5</div>
+      <div id="match-status-msg" class="match-message" style="color: #00f2fe;"></div>
+      <div id="match-timer" style="font-size: 1.5rem; color: #ffaa00; margin-bottom: 20px;">00:30</div>
+      <div class="match-grid">
+        <div id="match-left" class="match-column"></div>
+        <div id="match-right" class="match-column"></div>
+      </div>
+      <button class="glass-button" style="margin-top: 40px" onclick="location.reload()">ВЫХОД</button>
+    </div>
+
+
+  </div>
+  </div>
+  </div>
+
+  <!-- GUIDE MODAL -->
+  <div id="guide-modal" class="modal-overlay" style="display: none">
+    <div class="modal-content guide-content">
+      <h2 style="color: var(--primary-green); text-align: center; text-shadow: 0 0 15px var(--primary-green);">
+        ИНСТРУКЦИЯ ПО ЭКСПЛУАТАЦИИ</h2>
+
+      <div class="guide-section">
+        <h3>1. ИЗУЧЕНИЕ (STUDY)</h3>
+        <p>Здесь вы выбираете новые слова по уровню (A1-C1) и части речи. Нажав на <span class="guide-key">✔</span>, вы
+          сохраняете слово. Оно уходит в категорию "Изученные" с начальным 1-м уровнем.</p>
+        <p>Используйте <span class="guide-key">✖</span>, чтобы навсегда убрать слово в архив "Завершенные".</p>
+      </div>
+
+      <div class="guide-section">
+        <h3>2. ПОВТОРЕНИЕ (SRS)</h3>
+        <p>Алгоритм интервальных повторений. Оценивайте свои знания кнопками 0-4:</p>
+        <ul>
+          <li><span class="guide-key">4 & 3:</span> Увеличение уровня слова в 3 или 2 раза. Слово пропадает на
+            количество часов, равное его уровню.</li>
+          <li><span class="guide-key">2:</span> Уровень не меняется, слово скрывается на 1 час.</li>
+          <li><span class="guide-key">1 & 0:</span> Слово отправляется в пул <b>MATCH MODE</b> для закрепления. Оценка 0
+            также снижает уровень вдвое.</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h3>3. MATCH MODE</h3>
+        <p>Мини-игра на время (30 сек). Сопоставьте 5 слов с их переводом. Если ошиблись или время вышло — игра
+          сбросится. После победы слова сразу возвращаются в блок "Изученные" (статус READY).</p>
+      </div>
+
+      <div class="guide-section">
+        <h3>4. ЖУРНАЛ И СТАТУСЫ</h3>
+        <p>В журнале можно смотреть свой прогресс. Колонка статус подскажет:</p>
+        <ul>
+          <li><span style="color:#00ff80">READY:</span> Доступно для повторения.</li>
+          <li><span style="color:#00f2fe">MATCH:</span> Ждет игры в Match Mode.</li>
+          <li><span style="color:#ffa500">⏳ Время:</span> Отдыхает под таймером.</li>
+        </ul>
+      </div>
+
+      <div class="modal-actions">
+        <div class="dont-show-container">
+          <input type="checkbox" id="dont-show-guide">
+          <label for="dont-show-guide">Больше не показывать при входе</label>
+        </div>
+        <button class="glass-button start-btn" onclick="closeGuide()" style="width: 100%; margin-top:20px;">ПОНЯТНО,
+          ВПЕРЕД!</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="review-modal" class="modal-overlay" style="display: none">
+    <div class="modal-content">
+      <h2 style="color: #00ff41; margin-bottom: 20px; text-shadow: 0 0 10px #00ff41">
+        ПАРАМЕТРЫ ПОВТОРЕНИЯ
+      </h2>
+
+      <div class="modal-group">
+        <label>НАПРАВЛЕНИЕ:</label>
+        <div class="modal-options">
+          <button id="mode-en-ru" class="glass-button active" onclick="selectOption('mode', 'eng-rus')">
+            EN ➔ RU
+          </button>
+          <button id="mode-ru-en" class="glass-button" onclick="selectOption('mode', 'rus-eng')">
+            RU ➔ EN
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-group">
+        <label>СОРТИРОВКА:</label>
+        <div class="modal-options">
+          <button id="sort-random" class="glass-button active" onclick="selectOption('sort', 'random')">
+            СЛУЧАЙНО
+          </button>
+          <button id="sort-level" class="glass-button" onclick="selectOption('sort', 'level')">
+            СЛАБЫЕ (LVL)
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 30px">
+        <button class="glass-button start-btn" onclick="confirmReviewStart()" style="width: 100%">
+          ЗАПУСТИТЬ ТРЕНИРОВКУ
+        </button>
+        <button class="glass-button" onclick="closeModal()"
+          style="width: 100%; margin-top: 10px; border-color: #ff4d4d; color: #ff4d4d">
+          ОТМЕНА
+        </button>
+      </div>
+    </div>
+  </div>
+  <script src="words.js"></script>
+  <script>
+    // --- Инициализация данных ---
+    // learnedWords уже объявлен в words.js, не используем let/var здесь
+    matchPool = JSON.parse(localStorage.getItem('match_pool')) || [];
+    finishedWords = JSON.parse(localStorage.getItem('finished_words')) || [];
+
+    let todayDate = new Date().toISOString().split('T')[0];
+    let reviewStats = JSON.parse(localStorage.getItem('review_stats') || '{"date": "", "count": 0}');
+    if (reviewStats.date !== todayDate) {
+      reviewStats = { date: todayDate, count: 0 };
+      localStorage.setItem('review_stats', JSON.stringify(reviewStats));
+    }
+
+    let currentSelection = [];
+    let currentJournalTab = 'learned'; // 'learned' or 'finished'
+
+    // --- Управление экранами ---
+    function switchScreen(screenId) {
+      // Прячем абсолютно все блоки контента
+      const screens = ['setup-panel', 'table-container', 'review-container', 'journal-screen', 'match-screen', 'review-modal'];
+      screens.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+
+      // Останавливаем таймер Match Mode, если выходим из него
+      if (screenId !== 'match-screen') {
+        clearInterval(matchTimer);
+      }
+
+      // Блок кнопок-фильтров (button-row) показываем только если мы в режиме изучения
+      const btnRow = document.querySelector('.button-row');
+      if (btnRow) {
+        btnRow.style.display = (screenId === 'setup-panel' || screenId === 'table-container') ? 'block' : 'none';
+      }
+
+      const target = document.getElementById(screenId);
+      if (target) {
+        if (screenId === 'setup-panel') {
+          target.style.display = 'flex';
+        } else {
+          target.style.display = 'block';
+        }
+      }
+
+      // Обновление активной кнопки в навигации
+      document.querySelectorAll('.nav-header .glass-button').forEach(btn => btn.classList.remove('active'));
+      const buttons = document.querySelectorAll('.nav-header .glass-button');
+      if (screenId === 'setup-panel' || screenId === 'table-container') buttons[0].classList.add('active');
+      if (screenId === 'review-container') buttons[1].classList.add('active');
+      if (screenId === 'match-screen') buttons[2].classList.add('active');
+      if (screenId === 'journal-screen') buttons[3].classList.add('active');
+    }
+
+    // --- Логика Изучения ---
+    function generateNewList() {
+      const level = document.getElementById('filter-level').value;
+      const type = document.getElementById('filter-type').value;
+
+      let pool = allWords.filter(w =>
+        !learnedWords.some(lw => lw.word === w.word) &&
+        !matchPool.some(mw => mw.word === w.word) &&
+        !finishedWords.some(fw => fw.word === w.word)
+      );
+
+      if (level !== 'all') pool = pool.filter(w => w.level.includes(level));
+      if (type !== 'all') pool = pool.filter(w => w.type.includes(type));
+
+      currentSelection = pool.sort(() => 0.5 - Math.random()).slice(0, 20);
+      renderTable();
+      switchScreen('table-container');
+      document.getElementById('setup-panel').style.display = 'flex'; // Показываем панель сверху
+    }
+
+    function renderTable() {
+      const grid = document.getElementById('words-grid');
+      grid.innerHTML = '';
+      document.getElementById('table-container').style.display = 'block';
+
+      currentSelection.forEach((w, i) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${i + 1}</td>
+          <td class="word-cell">
+            <span class="main-word" onclick="addHint('${w.word}')" onmouseover="showHint(event, '${w.word}')" onmouseout="hideHint()">${w.word}</span>
+            <span class="word-tag">${w.type}</span>
+          </td>
+          <td class="phonetic-cell">${w.phonetic}</td>
+          <td class="translation-cell hidden" onclick="this.classList.toggle('hidden')">${w.translation}</td>
+          <td><button class="audio-icon" onclick="playAudio('${w.word.split(',')[0]}')">🔊</button></td>
+          <td><div class="level-box">${w.level}</div></td>
+          <td>
+            <div class="status-cell-btns">
+              <button class="done-btn" onclick="saveAsLearned('${w.word.replace(/'/g, "\\'")}', this)">✔</button>
+              <button class="finish-btn" title="Завершить слово" onclick="moveToFinished('${w.word.replace(/'/g, "\\'")}', this)">✖</button>
+            </div>
+          </td>
+        `;
+        grid.appendChild(row);
+      });
+      updateCounter();
+    }
+
+    function saveAsLearned(word, btn) {
+      const wordData = allWords.find(w => w.word === word);
+      if (wordData && !learnedWords.some(lw => lw.word === word)) {
+        const learnedEntry = {
+          ...wordData,
+          learnedDate: todayDate,
+          timestampAdded: Date.now(),
+          stats: {
+            eng: { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 },
+            rus: { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 }
+          },
+          progress: {
+            eng: { level: 1, nextReview: Date.now() },
+            rus: { level: 1, nextReview: Date.now() }
+          }
+        };
+        learnedWords.push(learnedEntry);
+        localStorage.setItem('oxford_learned', JSON.stringify(learnedWords));
+        animateRowRemoval(btn);
+      }
+    }
+
+    function moveToFinished(word, btn) {
+      if (!confirm(`Завершить работу со словом "${word}"? Оно больше не появится в обучении.`)) return;
+
+      const wordData = allWords.find(w => w.word === word) || learnedWords.find(lw => lw.word === word);
+      if (wordData) {
+        // Удаляем из изученных если оно там было
+        learnedWords = learnedWords.filter(lw => lw.word !== word);
+        matchPool = matchPool.filter(mw => mw.word !== word);
+
+        if (!finishedWords.some(fw => fw.word === word)) {
+          finishedWords.push({ ...wordData, finishedDate: todayDate });
+        }
+
+        localStorage.setItem('oxford_learned', JSON.stringify(learnedWords));
+        localStorage.setItem('match_pool', JSON.stringify(matchPool));
+        localStorage.setItem('finished_words', JSON.stringify(finishedWords));
+
+        animateRowRemoval(btn);
+      }
+    }
+
+    function animateRowRemoval(btn) {
+      const row = btn.closest('tr');
+      row.style.transform = 'translateX(50px)';
+      row.style.opacity = '0';
+      setTimeout(() => {
+        row.remove();
+        updateCounter();
+      }, 300);
+    }
+
+    // --- Логика Повторения (SRS) ---
+    let currentReviewWord = null;
+    let reviewMode = 'eng-rus';
+    let reviewSortOrder = 'random';
+
+    function startReview(mode, sortOrder) {
+      reviewMode = mode;
+      reviewSortOrder = sortOrder;
+      switchScreen('review-container');
+      nextReviewWord();
+    }
+
+    function nextReviewWord() {
+      const now = Date.now();
+      const modeKey = reviewMode === 'eng-rus' ? 'eng' : 'rus';
+
+      let available = learnedWords.filter(w => {
+        if (!w.progress) w.progress = { eng: { level: 1, nextReview: 0 }, rus: { level: 1, nextReview: 0 } };
+        return w.progress[modeKey].nextReview <= now;
+      });
+
+      if (available.length === 0) {
+        alert('Все слова на сегодня повторены!');
+        location.reload();
+        return;
+      }
+
+      currentReviewWord = (reviewSortOrder === 'random')
+        ? available[Math.floor(Math.random() * available.length)]
+        : available.sort((a, b) => a.progress[modeKey].level - b.progress[modeKey].level)[0];
+
+      renderReviewCard(modeKey);
+    }
+
+    function renderReviewCard(modeKey) {
+      const wordDisp = document.getElementById('review-word-display');
+      const transDisp = document.getElementById('review-translation');
+      const badge = document.getElementById('review-mode-badge');
+      const lvlTag = document.getElementById('review-level-tag');
+
+      badge.innerText = reviewMode === 'eng-rus' ? 'EN ➔ RU' : 'RU ➔ EN';
+      lvlTag.innerText = `LVL ${currentReviewWord.progress[modeKey].level}`;
+
+      document.getElementById('rating-buttons').style.display = 'none';
+      document.getElementById('show-answer-btn').style.display = 'inline-block';
+      document.getElementById('review-replay-audio').style.display = 'none';
+      transDisp.style.display = 'none';
+
+      if (reviewMode === 'eng-rus') {
+        wordDisp.innerText = currentReviewWord.word;
+        transDisp.innerText = currentReviewWord.translation;
+      } else {
+        wordDisp.innerText = currentReviewWord.translation;
+        transDisp.innerText = currentReviewWord.word;
+      }
+      document.getElementById('review-phonetic').innerText = currentReviewWord.phonetic;
+
+      // Сетка и цвета
+      const seed = [...currentReviewWord.word].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const h1 = seed % 360;
+      const bg = document.getElementById('card-bg') || createCardBg();
+      bg.style.setProperty('--grid-color', `hsla(${h1}, 100%, 60%, 0.15)`);
+      wordDisp.style.color = `hsl(${h1}, 100%, 95%)`;
+    }
+
+    function createCardBg() {
+      const bg = document.createElement('div');
+      bg.id = 'card-bg';
+      bg.innerHTML = '<div class="cyber-grid"></div><div class="cyber-nebula"></div>';
+      document.querySelector('.review-card').prepend(bg);
+      return bg;
+    }
+
+    function showReviewAnswer() {
+      document.getElementById('review-translation').style.display = 'block';
+      document.getElementById('show-answer-btn').style.display = 'none';
+      document.getElementById('rating-buttons').style.display = 'flex';
+      document.getElementById('review-replay-audio').style.display = 'inline-block';
+      playAudio(currentReviewWord.word);
+    }
+
+    function rateWord(score) {
+      const modeKey = reviewMode === 'eng-rus' ? 'eng' : 'rus';
+      const index = learnedWords.findIndex(w => w.word === currentReviewWord.word);
+      if (index === -1) return;
+
+      let w = learnedWords[index];
+      let p = w.progress[modeKey];
+      let stats = w.stats[modeKey];
+
+      stats.views++;
+      stats.scores[score]++;
+
+      const oldLvl = p.level;
+      let waitHours = 0;
+
+      // --- НОВАЯ ЛОГИКА SRS ---
+      switch (score) {
+        case 4:
+          p.level = p.level * 3;
+          waitHours = p.level; // 1 час за каждый уровень (т.е. p.level часов)
+          break;
+        case 3:
+          p.level = p.level * 2;
+          waitHours = p.level;
+          break;
+        case 2:
+          // Уровень не меняется
+          waitHours = 1; // Убираем на 1 час
+          break;
+        case 1:
+          // В пул MATCH, уровень не меняется
+          sendToMatchPool(w);
+          learnedWords.splice(index, 1);
+          saveAndRefresh();
+          return;
+        case 0:
+          // Уровень / 2 (вверх), в пул MATCH
+          p.level = Math.ceil(p.level / 2);
+          sendToMatchPool(w);
+          learnedWords.splice(index, 1);
+          saveAndRefresh();
+          return;
+      }
+
+      p.nextReview = Date.now() + (waitHours * 60 * 60 * 1000);
+
+      const diff = p.level - oldLvl;
+      if (diff > 0) stats.totalEarned += diff;
+      else stats.totalLost += Math.abs(diff);
+
+      saveAndRefresh();
+    }
+
+    function saveAndRefresh() {
+      localStorage.setItem('oxford_learned', JSON.stringify(learnedWords));
+      reviewStats.count++;
+      localStorage.setItem('review_stats', JSON.stringify(reviewStats));
+      updateCounter();
+      nextReviewWord();
+    }
+
+    function sendToMatchPool(word) {
+      if (!matchPool.some(mw => mw.word === word.word)) {
+        matchPool.push(word);
+        localStorage.setItem('match_pool', JSON.stringify(matchPool));
+      }
+    }
+
+    // --- MATCH MODE ---
+    let matchTimer = null;
+    let matchTimeLeft = 30;
+    let matchSelected = null;
+
+    function startMatchMode() {
+      if (matchPool.length < 5) {
+        alert(`Для запуска Match нужно минимум 5 слов в пуле. Сейчас: ${matchPool.length}. (Слова попадают сюда при оценке 0 или 1)`);
+        updateMatchPoolInfo();
+        switchScreen('setup-panel'); // Возвращаемся или остаемся
+        document.getElementById('match-pool-info').style.display = 'block';
+        return;
+      }
+
+      switchScreen('match-screen');
+      const info = document.getElementById('match-pool-info');
+      info.style.display = 'block';
+      info.innerText = `Слов в пуле: ${matchPool.length}`;
+
+      initMatchGame();
+    }
+
+    function initMatchGame() {
+      clearInterval(matchTimer);
+      matchTimeLeft = 30;
+      updateTimerDisplay();
+
+      const pool = [...matchPool].sort(() => 0.5 - Math.random()).slice(0, 5);
+      const words = pool.map(w => ({ id: w.word, text: w.word, type: 'word' }));
+      const trans = pool.map(w => ({ id: w.word, text: w.translation, type: 'trans' }));
+
+      renderMatchGrid(words.sort(() => 0.5 - Math.random()), trans.sort(() => 0.5 - Math.random()));
+
+      matchTimer = setInterval(() => {
+        matchTimeLeft--;
+        updateTimerDisplay();
+        if (matchTimeLeft <= 0) {
+          clearInterval(matchTimer);
+          document.getElementById('match-status-msg').innerText = 'Время вышло! Пересоздание...';
+          document.getElementById('match-status-msg').style.color = '#ff4d4d';
+          setTimeout(initMatchGame, 1500);
+        }
+      }, 1000);
+    }
+
+    function renderMatchGrid(words, trans) {
+      const leftCol = document.getElementById('match-left');
+      const rightCol = document.getElementById('match-right');
+      leftCol.innerHTML = '';
+      rightCol.innerHTML = '';
+
+      words.forEach(w => leftCol.appendChild(createMatchCard(w)));
+      trans.forEach(t => rightCol.appendChild(createMatchCard(t)));
+    }
+
+    function createMatchCard(item) {
+      const div = document.createElement('div');
+      div.className = 'match-card';
+      div.innerText = item.text;
+      div.dataset.id = item.id;
+      div.dataset.type = item.type;
+      div.onclick = () => handleMatchClick(div);
+      return div;
+    }
+
+    function handleMatchClick(card) {
+      if (card.classList.contains('matched')) return;
+      playHoverSound();
+
+      if (matchSelected) {
+        if (matchSelected === card) {
+          card.classList.remove('selected');
+          matchSelected = null;
+          return;
+        }
+
+        if (matchSelected.dataset.id === card.dataset.id && matchSelected.dataset.type !== card.dataset.type) {
+          card.classList.add('matched');
+          matchSelected.classList.add('matched');
+          matchSelected = null;
+          checkMatchVictory();
+        } else {
+          card.classList.add('wrong');
+          document.getElementById('match-status-msg').innerText = 'Ошибка! Сброс игры...';
+          document.getElementById('match-status-msg').style.color = '#ff4d4d';
+          setTimeout(() => {
+            initMatchGame();
+            document.getElementById('match-status-msg').innerText = '';
+          }, 1000);
+          matchSelected.classList.remove('selected');
+          matchSelected = null;
+        }
+      } else {
+        matchSelected = card;
+        card.classList.add('selected');
+      }
+    }
+
+    function checkMatchVictory() {
+      const remaining = document.querySelectorAll('.match-card:not(.matched)');
+      if (remaining.length === 0) {
+        clearInterval(matchTimer);
+
+        // Переносим слова обратно в Learned
+        const currentMatchedIds = Array.from(document.querySelectorAll('.match-card')).map(c => c.dataset.id);
+        const uniqueIds = [...new Set(currentMatchedIds)];
+
+        uniqueIds.forEach(id => {
+          const word = matchPool.find(mw => mw.word === id);
+          if (word) {
+            // Убираем кулдаун (ставим 0), чтобы слова сразу появились в повторении
+            if (!word.progress) word.progress = { eng: { level: 1, nextReview: 0 }, rus: { level: 1, nextReview: 0 } };
+            word.progress.eng.nextReview = Date.now();
+            word.progress.rus.nextReview = Date.now();
+
+            learnedWords.push(word);
+            matchPool = matchPool.filter(mw => mw.word !== id);
+          }
+        });
+
+        localStorage.setItem('oxford_learned', JSON.stringify(learnedWords));
+        localStorage.setItem('match_pool', JSON.stringify(matchPool));
+
+        document.getElementById('match-status-msg').innerText = 'Отлично! Слова возвращены в список.';
+        document.getElementById('match-status-msg').style.color = '#00ff80';
+        setTimeout(() => location.reload(), 1500);
+      }
+    }
+
+    function updateTimerDisplay() {
+      const timerEl = document.getElementById('match-timer');
+      timerEl.innerText = `00:${matchTimeLeft.toString().padStart(2, '0')}`;
+      if (matchTimeLeft <= 10) timerEl.classList.add('timer-pulse');
+      else timerEl.classList.remove('timer-pulse');
+    }
+
+    function updateMatchPoolInfo() {
+      const el = document.getElementById('match-pool-info');
+      if (matchPool.length > 0) {
+        el.style.display = 'block';
+        el.innerText = `В ПУЛЕ MATCH: ${matchPool.length} / 5`;
+      } else {
+        el.style.display = 'none';
+      }
+    }
+
+    // --- ЖУРНАЛ ---
+    function setJournalTab(tab) {
+      currentJournalTab = tab;
+      document.getElementById('tab-learned').classList.toggle('active', tab === 'learned');
+      document.getElementById('tab-finished').classList.toggle('active', tab === 'finished');
+
+      // Скрываем переключатель направления для удаленных слов (там оно не важно)
+      document.getElementById('journal-mode-selector-box').style.display = (tab === 'learned' ? 'flex' : 'none');
+
+      renderJournal();
+    }
+
+    function renderJournal() {
+      const grid = document.getElementById('journal-grid');
+      const searchTerm = document.getElementById('journal-search').value.toLowerCase();
+      grid.innerHTML = '';
+
+      // Журнал должен включать слова из matchPool, если мы смотрим "изученные"
+      let list = (currentJournalTab === 'learned') ? [...learnedWords, ...matchPool] : finishedWords;
+
+      list.filter(w => w.word.toLowerCase().includes(searchTerm) || w.translation.toLowerCase().includes(searchTerm))
+        .forEach(w => {
+          const row = document.createElement('tr');
+          if (currentJournalTab === 'learned') {
+            const p = w.progress[currentJournalMode] || { level: 1, nextReview: 0 };
+            const s = w.stats[currentJournalMode] || { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 };
+            const days = Math.floor((Date.now() - (w.timestampAdded || Date.now())) / 86400000);
+
+            // Логика статуса
+            let statusHtml = '';
+            const isInMatch = matchPool.some(mw => mw.word === w.word);
+            const now = Date.now();
+            const waitTime = p.nextReview - now;
+
+            if (isInMatch) {
+              statusHtml = '<span style="color:#00f2fe; font-weight:bold">MATCH</span>';
+            } else if (waitTime > 0) {
+              statusHtml = `<span style="color:#ffa500; font-size:0.8rem">⏳ ${formatTime(waitTime)}</span>`;
+            } else {
+              statusHtml = '<span style="color:#00ff80">READY</span>';
+            }
+
+            row.innerHTML = `
+                <td style="text-align:left">${currentJournalMode === 'eng' ? w.word : w.translation}</td>
+                <td><div class="level-box">${p.level}</div></td>
+                <td>${s.views}</td>
+                <td>${days} дн.</td>
+                <td style="color:#ff4d4d">${s.scores[0]}</td>
+                <td style="color:#ffa500">${s.scores[1]}</td>
+                <td style="color:#ffff00">${s.scores[2]}</td>
+                <td style="color:#90ee90">${s.scores[3]}</td>
+                <td style="color:#00ff00">${s.scores[4]}</td>
+                <td><span style="color:#00ff80">+${s.totalEarned}</span> / <span style="color:#ff4d4d">-${s.totalLost}</span></td>
+                <td>${statusHtml}</td>
+             `;
+          } else {
+            row.innerHTML = `
+                <td style="text-align:left"><b>${w.word}</b></td>
+                <td colspan="9" style="text-align:left; opacity:0.7">${w.translation}</td>
+                <td style="font-size:0.7rem">${w.finishedDate || ''}</td>
+             `;
+          }
+          grid.appendChild(row);
+        });
+    }
+
+    function formatTime(ms) {
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      if (h > 0) return `${h}ч ${m}м`;
+      return `${m}м`;
+    }
+
+    // --- УТИЛИТЫ ---
+    function updateCounter() {
+      const currentTime = Date.now();
+      ['A1', 'A2', 'B1', 'B2', 'C1'].forEach(lvl => {
+        const count = learnedWords.filter(w => w.level.includes(lvl)).length;
+        if (document.getElementById(`stat-${lvl.toLowerCase()}`)) document.getElementById(`stat-${lvl.toLowerCase()}`).innerText = count;
+      });
+
+      document.getElementById('stat-avail-learn').innerText = allWords.length - learnedWords.length - finishedWords.length - matchPool.length;
+      document.getElementById('stat-avail-eng').innerText = learnedWords.filter(w => w.progress.eng.nextReview <= currentTime).length;
+      document.getElementById('stat-avail-rus').innerText = learnedWords.filter(w => w.progress.rus.nextReview <= currentTime).length;
+      document.getElementById('stat-today-new').innerText = learnedWords.filter(w => w.learnedDate === todayDate).length;
+      document.getElementById('stat-today-rev').innerText = reviewStats.count;
+      document.getElementById('learned-stat').innerText = learnedWords.length;
+
+      updateStreakDisplay();
+      updateMatchPoolInfo();
+    }
+
+    function updateStreakDisplay() {
+      const streakData = JSON.parse(localStorage.getItem('user_streak') || '{"lastDate": "", "count": 0}');
+      const today = todayDate;
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+      if (streakData.lastDate !== today) {
+        if (streakData.lastDate === yesterday) {
+          streakData.count++;
+        } else if (streakData.lastDate !== "") {
+          streakData.count = 0;
+        } else {
+          streakData.count = 1;
+        }
+        streakData.lastDate = today;
+        localStorage.setItem('user_streak', JSON.stringify(streakData));
+      }
+      document.getElementById('stat-streak').innerText = streakData.count;
+    }
+
+    function playAudio(word) {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(word);
+      utter.lang = 'en-US';
+      window.speechSynthesis.speak(utter);
+    }
+
+    function downloadBackup() {
+      const data = { learned: learnedWords, finished: finishedWords, match: matchPool, streak: localStorage.getItem('user_streak') };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cyber_progress_${todayDate}.json`;
+      a.click();
+    }
+
+    function restoreBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.learned) localStorage.setItem('oxford_learned', JSON.stringify(data.learned));
+          if (data.finished) localStorage.setItem('finished_words', JSON.stringify(data.finished));
+          if (data.match) localStorage.setItem('match_pool', JSON.stringify(data.match));
+          if (data.streak) localStorage.setItem('user_streak', data.streak);
+          alert('Прогресс успешно загружен! Приложение будет перезагружено.');
+          location.reload();
+        } catch (err) {
+          alert('Ошибка при чтении файла JSON!');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function closeGuide() {
+      if (document.getElementById('dont-show-guide').checked) {
+        localStorage.setItem('hide_cyber_guide', 'true');
+      }
+      document.getElementById('guide-modal').style.display = 'none';
+    }
+
+    // --- ЖУРНАЛ ---
+    function showJournal() {
+      switchScreen('journal-screen');
+      document.querySelectorAll('.nav-header .glass-button').forEach(btn => btn.classList.remove('active'));
+      const buttons = document.querySelectorAll('.nav-header .glass-button');
+      if (buttons[3]) buttons[3].classList.add('active'); // Кнопка "Журнал"
+
+      window.scrollTo(0, 0);
+      renderJournal();
+    }
+
+    // --- Функционал ПОДСКАЗОК ---
+    function addHint(word) {
+      const currentHint = localStorage.getItem(`hint_${word}`) || '';
+      const newHint = prompt(`Введите подсказку/ассоциацию для "${word}":`, currentHint);
+      if (newHint !== null) {
+        localStorage.setItem(`hint_${word}`, newHint);
+      }
+    }
+
+    function showHint(event, word) {
+      const hint = localStorage.getItem(`hint_${word}`);
+      if (hint) {
+        const tooltip = document.getElementById('tooltip');
+        const target = event.currentTarget;
+        tooltip.innerText = `💡 ${hint}`;
+        tooltip.style.display = 'block';
+        target.appendChild(tooltip);
+      }
+    }
+
+    function hideHint() {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.style.display = 'none';
+      document.body.appendChild(tooltip);
+    }
+
+    // Глобальные обработчики для наведения и кликов
+    const hoverSound = new Audio('music/notification.mp3');
+    hoverSound.volume = 0.05;
+    function playHoverSound() {
+      hoverSound.currentTime = 0;
+      hoverSound.play().catch(() => { });
+    }
+
+    document.addEventListener('mouseover', (e) => {
+      if (e.target.closest('button') || e.target.closest('select')) playHoverSound();
+    });
+
+    document.addEventListener('click', (e) => {
+      const trans = e.target.closest('.translation-cell');
+      if (trans) {
+        playHoverSound();
+        trans.classList.add('flash-active');
+        setTimeout(() => trans.classList.remove('flash-active'), 200);
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('review-container').style.display === 'block') {
+        const showBtn = document.getElementById('show-answer-btn');
+        if (e.code === 'Space' && showBtn.style.display !== 'none') {
+          e.preventDefault();
+          showReviewAnswer();
+        } else if (['0', '1', '2', '3', '4'].includes(e.key)) {
+          if (document.getElementById('rating-buttons').style.display === 'flex') {
+            rateWord(parseInt(e.key));
+          }
+        }
+      }
+    });
+
+    window.setJournalMode = (mode) => {
+      window.currentJournalMode = mode;
+      document.getElementById('j-mode-eng').classList.toggle('active', mode === 'eng');
+      document.getElementById('j-mode-rus').classList.toggle('active', mode === 'rus');
+      renderJournal();
+    };
+
+    function shuffleCurrentList() {
+      currentSelection.sort(() => 0.5 - Math.random());
+      renderTable();
+    }
+
+    function replayCurrentAudio() {
+      if (currentReviewWord) playAudio(currentReviewWord.word);
+    }
+
+    function closeModal() {
+      document.getElementById('review-modal').style.display = 'none';
+    }
+
+    function selectOption(type, value) {
+      if (type === 'mode') {
+        reviewMode = value;
+        document.getElementById('mode-en-ru').classList.toggle('active', value === 'eng-rus');
+        document.getElementById('mode-ru-en').classList.toggle('active', value === 'rus-eng');
+      } else if (type === 'sort') {
+        reviewSortOrder = value;
+        document.getElementById('sort-random').classList.toggle('active', value === 'random');
+        document.getElementById('sort-level').classList.toggle('active', value === 'level');
+      }
+    }
+
+    function confirmReviewStart() {
+      closeModal();
+      startReview(reviewMode, reviewSortOrder);
+    }
+
+    function sortJournal(criteria) {
+      const list = (currentJournalTab === 'learned') ? learnedWords : finishedWords;
+      list.sort((a, b) => {
+        if (criteria === 'word') return a.word.localeCompare(b.word);
+        if (criteria === 'level') return (b.progress?.eng?.level || 0) - (a.progress?.eng?.level || 0);
+        // Добавьте другие если нужно
+        return 0;
+      });
+      renderJournal();
+    }
+
+    window.currentJournalMode = 'eng';
+    updateCounter();
+
+    // Проверка гида при входе
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('hide_cyber_guide') !== 'true') {
+        document.getElementById('guide-modal').style.display = 'flex';
+      }
+    });
+  </script>
+</body>
+
+</html>
