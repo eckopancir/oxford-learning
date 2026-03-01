@@ -6,10 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Oxford 5000 | Cyber Learning</title>
   <link rel="stylesheet" href="stylewords.css" />
+  <link rel="icon" type="image/png" href="favicon.png" />
 </head>
 
 <body>
   <div class="stats-top-bar">
+    <div class="cyber-logo" onclick="location.reload()">
+      <span class="part1">Cyber</span>
+      <span class="part2">English</span>
+    </div>
     <div class="stat-banner"><span class="label">A1:</span> <span id="stat-a1">0</span></div>
     <div class="stat-banner"><span class="label">A2:</span> <span id="stat-a2">0</span></div>
     <div class="stat-banner"><span class="label">B1:</span> <span id="stat-b1">0</span></div>
@@ -39,8 +44,8 @@
 
     <div class="divider">|</div>
 
-    <div class="stat-banner record">
-      <span class="label">WEEK BEST:</span> <span id="stat-week-record">0</span>
+    <div class="stat-banner record" title="Лучший результат новых слов за день в этом месяце">
+      <span class="label">MONTH BEST:</span> <span id="stat-month-record">0</span>
     </div>
     <div class="stat-banner record">
       <span class="label">TOTAL:</span> <span id="learned-stat">0</span>
@@ -54,8 +59,30 @@
     <div class="nav-header">
       <button class="glass-button active" onclick="switchScreen('setup-panel')">Изучение</button>
       <button class="glass-button" onclick="showReviewOptions()">Изученные</button>
-      <button class="glass-button" onclick="startMatchMode()">Match</button>
+      <button class="glass-button" onclick="startMatchMode()">Соответствие</button>
       <button class="glass-button" onclick="showJournal()">Журнал</button>
+      <button class="glass-button" onclick="showReading()">Чтение</button>
+    </div>
+
+    <!-- READING SCREEN -->
+    <div id="reading-screen" style="display: none; text-align: center; margin-top: 20px;">
+      <h2 style="color: var(--primary-green); text-shadow: 0 0 10px var(--primary-green);">CYBER READING</h2>
+      <p style="color: #888; margin-bottom: 20px;">Генерация истории на основе ваших изученных слов</p>
+
+      <div id="reading-controls" style="margin-bottom: 20px;">
+        <button id="gen-story-btn" class="glass-button start-btn" onclick="generateStory()">ГЕНЕРИРОВАТЬ
+          РАССКАЗ</button>
+      </div>
+
+      <div id="story-display" class="story-container" style="display: none;">
+        <div id="story-text-en" class="story-content en"></div>
+        <hr style="border: 0; border-top: 1px dashed rgba(0, 255, 128, 0.2); margin: 20px 0;">
+        <div id="story-text-ru" class="story-content ru" style="opacity: 0.7; font-style: italic;"></div>
+      </div>
+
+      <div id="reading-placeholder" style="padding: 50px; opacity: 0.5;">
+        Нажмите кнопку выше, чтобы составить историю из вашего словаря...
+      </div>
     </div>
     <div id="journal-screen" style="display: none">
       <div class="journal-tabs">
@@ -100,7 +127,7 @@
               <th onclick="sortJournal('score3')">3</th>
               <th onclick="sortJournal('score4')">4</th>
               <th onclick="sortJournal('diff')">📈 Прогресс</th>
-              <th>🕒 Статус</th>
+              <th onclick="sortJournal('status')">🕒 Статус</th>
             </tr>
           </thead>
           <tbody id="journal-grid"></tbody>
@@ -209,6 +236,12 @@
           <button id="show-answer-btn" class="glass-button start-btn" onclick="showReviewAnswer()">
             Показать ответ
           </button>
+          <button id="ai-gen-btn" class="glass-button" style="border-color: #00f2fe; color: #00f2fe; margin-left: 10px;"
+            onclick="generateExampleSentence(currentReviewWord.word)">
+            Помощь (AI)
+          </button>
+
+          <div id="example-display" style="margin-top: 20px;"></div>
 
           <div id="rating-buttons" style="display: none; gap: 12px; justify-content: center; margin-top: 25px">
             <button onclick="rateWord(0)" style="background: #ff4d4d" class="rate-btn">0</button>
@@ -359,7 +392,7 @@
     // --- Управление экранами ---
     function switchScreen(screenId) {
       // Прячем абсолютно все блоки контента
-      const screens = ['setup-panel', 'table-container', 'review-container', 'journal-screen', 'match-screen', 'review-modal'];
+      const screens = ['setup-panel', 'table-container', 'review-container', 'journal-screen', 'match-screen', 'review-modal', 'reading-screen'];
       screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -392,6 +425,10 @@
       if (screenId === 'review-container') buttons[1].classList.add('active');
       if (screenId === 'match-screen') buttons[2].classList.add('active');
       if (screenId === 'journal-screen') buttons[3].classList.add('active');
+      if (screenId === 'reading-screen') {
+        const btns = document.querySelectorAll('.nav-header .glass-button');
+        if (btns[4]) btns[4].classList.add('active');
+      }
     }
 
     // --- Логика Изучения ---
@@ -543,6 +580,8 @@
       document.getElementById('show-answer-btn').style.display = 'inline-block';
       document.getElementById('review-replay-audio').style.display = 'none';
       transDisp.style.display = 'none';
+      document.getElementById('example-display').innerHTML = ''; // Очищаем пример при смене слова
+      document.getElementById('ai-gen-btn').style.display = 'inline-block'; // Показываем кнопку помощи
 
       if (reviewMode === 'eng-rus') {
         wordDisp.innerText = currentReviewWord.word;
@@ -882,6 +921,36 @@
 
       updateStreakDisplay();
       updateMatchPoolInfo();
+      updateMonthlyBest();
+    }
+
+    function updateMonthlyBest() {
+      const todayNewCount = learnedWords.filter(w => w.learnedDate === todayDate).length;
+      const currentMonth = todayDate.substring(0, 7); // "YYYY-MM"
+
+      let monthlyBest = JSON.parse(localStorage.getItem('monthly_best') || '{"month": "", "record": 0, "date": ""}');
+
+      // Инициализация если месяц сменился или данных нет
+      if (monthlyBest.month !== currentMonth) {
+        monthlyBest = {
+          month: currentMonth,
+          record: todayNewCount,
+          date: todayDate
+        };
+      } else if (todayNewCount > monthlyBest.record) {
+        monthlyBest.record = todayNewCount;
+        monthlyBest.date = todayDate;
+      }
+
+      localStorage.setItem('monthly_best', JSON.stringify(monthlyBest));
+
+      const el = document.getElementById('stat-month-record');
+      if (el && monthlyBest.date) {
+        const dateObj = new Date(monthlyBest.date);
+        const day = dateObj.getDate();
+        const monthName = dateObj.toLocaleString('ru-RU', { month: 'short' });
+        el.innerText = `${day} ${monthName}: ${monthlyBest.record}`;
+      }
     }
 
     function updateStreakDisplay() {
@@ -903,14 +972,118 @@
       document.getElementById('stat-streak').innerText = streakData.count;
     }
 
-    function playAudio(word) {
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(word);
-      utter.lang = 'en-US';
-      window.speechSynthesis.speak(utter);
-    }
+    async function playAudio(word) {
+      if (!word) return;
+      const cleanWord = word.split(',')[0].trim();
+      const ttsProxyUrl = 'https://script.google.com/macros/s/AKfycbzIAHeVKj4iOQwIiCuDtEDVCuLFuz8ZseGP-zNUVMlRxZft1iVMuxxswRLRiPBL3Rr0Gg/exec';
 
-    function downloadBackup() {
+      try {
+        const response = await fetch(ttsProxyUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'tts',
+            text: cleanWord
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.audioData) {
+          // Создаем аудио из пришедшей строки Base64
+          const audio = new Audio(data.audioData);
+          await audio.play();
+        } else {
+          throw new Error("Аудио-данные не получены");
+        }
+      } catch (e) {
+        console.error("Ошибка прокси-озвучки:", e);
+        // Резервный системный голос
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(cleanWord);
+        utter.lang = 'en-US';
+        window.speechSynthesis.speak(utter);
+      }
+    }
+    async function generateExampleSentence(word) {
+      const btn = document.getElementById('ai-gen-btn');
+      const displayArea = document.getElementById('example-display');
+
+      if (!word) return;
+      const cleanWord = word.split(',')[0].trim();
+
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Thinking...';
+      btn.disabled = true;
+
+      const proxyUrl = 'https://script.google.com/macros/s/AKfycbz45sNzqA6uWyXgTpjwLcQQrxuk0IzCWl80gf5HKK96SdxzKQLTrDJVcLTRwg1uog3N/exec';
+
+      try {
+        const response = await fetch(proxyUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: [
+              {
+                role: 'system',
+                content: `You are a helpful English teacher. 
+            RULES:
+            1. Provide ONE short natural sentence with the word.
+            2. Provide an accurate Russian translation.
+            3. Return ONLY JSON: {"sentence": "...", "translation": "..."}`
+              },
+              {
+                role: 'user',
+                content: `Word: "${cleanWord}"`
+              }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.9,
+          }),
+        });
+
+        const data = await response.json();
+        const result = JSON.parse(data.choices[0].message.content);
+
+        if (displayArea) {
+          const newExample = document.createElement('div');
+          newExample.className = 'ai-example-item';
+          // Стили оставил черными, как в твоем коде, но добавил немного отступов
+          newExample.style.cssText = `
+        padding: 12px;
+        margin-bottom: 12px;
+        background: #000000;
+        color: #ffffff;
+        border-radius: 8px;
+        border-left: 4px solid #4CAF50;
+        font-family: sans-serif;
+        animation: fadeIn 0.3s ease;
+      `;
+
+          // Подсветка слова
+          const regex = new RegExp(`(${cleanWord})`, 'gi');
+          const highlightedSentence = result.sentence.replace(regex, '<strong style="color: #4CAF50;">$1</strong>');
+
+          // Формируем HTML со спойлером
+          newExample.innerHTML = `
+        <div style="margin-bottom: 8px; font-size: 1.1em;">${highlightedSentence}</div>
+        <details style="cursor: pointer; font-size: 0.9em; color: #bbb;">
+          <summary style="outline: none; list-style: none;">Показать перевод</summary>
+          <div style="margin-top: 5px; color: #fff; border-top: 1px solid #333; padding-top: 5px;">
+            ${result.translation}
+          </div>
+        </details>
+      `;
+
+          displayArea.insertBefore(newExample, displayArea.firstChild);
+        }
+
+      } catch (error) {
+        console.error('Ошибка:', error);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    } function downloadBackup() {
       const data = { learned: learnedWords, finished: finishedWords, match: matchPool, streak: localStorage.getItem('user_streak') };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -958,6 +1131,88 @@
       renderJournal();
     }
 
+    function showReading() {
+      switchScreen('reading-screen');
+      window.scrollTo(0, 0);
+    }
+
+    async function generateStory() {
+      if (learnedWords.length < 5) {
+        alert('Нужно хотя бы 5 изученных слов для генерации интересного рассказа!');
+        return;
+      }
+
+      const btn = document.getElementById('gen-story-btn');
+      const placeholder = document.getElementById('reading-placeholder');
+      const display = document.getElementById('story-display');
+      const textEn = document.getElementById('story-text-en');
+      const textRu = document.getElementById('story-text-ru');
+
+      // Ограничим выборку 10-15 словами, чтобы рассказ был логичным
+      const shuffled = [...learnedWords].sort(() => 0.5 - Math.random());
+      const selectedWords = shuffled.slice(0, 30);
+      const wordsString = selectedWords.map(w => w.word.split(',')[0].trim()).join(', ');
+
+      btn.innerHTML = '⏳ CYBER BRAIN THINKING...';
+      btn.disabled = true;
+      if (placeholder) placeholder.style.display = 'none';
+
+      const proxyUrl = 'https://script.google.com/macros/s/AKfycbz45sNzqA6uWyXgTpjwLcQQrxuk0IzCWl80gf5HKK96SdxzKQLTrDJVcLTRwg1uog3N/exec';
+
+      try {
+        const response = await fetch(proxyUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: [
+              {
+                role: 'system',
+                content: `You are a creative writer. Write a short story (15-20 sentences) in English using the words provided.
+            RULES:
+            1. Wrap the used words in <b>tags</b>.
+            2. Return ONLY a JSON object with keys "story_en" and "story_ru".`
+              },
+              {
+                role: 'user',
+                content: `Words to include: ${wordsString}.`
+              }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.7,
+          }),
+        });
+
+        const data = await response.json();
+        console.log("Ответ от прокси:", data); // Для отладки
+
+        // Проверяем структуру ответа (безопасный способ)
+        let content;
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          content = data.choices[0].message.content;
+        } else if (data.content) {
+          content = data.content;
+        }
+
+        if (!content) throw new Error("Empty response from AI");
+
+        const result = typeof content === 'string' ? JSON.parse(content) : content;
+
+        if (textEn && textRu) {
+          textEn.innerHTML = result.story_en;
+          textRu.innerHTML = result.story_ru;
+          display.style.display = 'block';
+          display.scrollIntoView({ behavior: 'smooth' });
+        }
+
+      } catch (error) {
+        console.error('Ошибка генерации рассказа:', error);
+        alert('Cyber Brain перегружен. Попробуйте уменьшить количество слов или нажать еще раз.');
+        if (placeholder) placeholder.style.display = 'block';
+      } finally {
+        btn.innerHTML = 'ГЕНЕРИРОВАТЬ НОВЫЙ РАССКАЗ';
+        btn.disabled = false;
+      }
+    }
     // --- Функционал ПОДСКАЗОК ---
     function addHint(word) {
       const currentHint = localStorage.getItem(`hint_${word}`) || '';
@@ -1056,14 +1311,75 @@
       startReview(reviewMode, reviewSortOrder);
     }
 
+    let journalSortDir = 1; // 1 for DESC, -1 for ASC
+    let lastCriteria = '';
+
     function sortJournal(criteria) {
-      const list = (currentJournalTab === 'learned') ? learnedWords : finishedWords;
-      list.sort((a, b) => {
-        if (criteria === 'word') return a.word.localeCompare(b.word);
-        if (criteria === 'level') return (b.progress?.eng?.level || 0) - (a.progress?.eng?.level || 0);
-        // Добавьте другие если нужно
-        return 0;
-      });
+      if (lastCriteria === criteria) {
+        journalSortDir *= -1;
+      } else {
+        journalSortDir = 1;
+        lastCriteria = criteria;
+      }
+
+      const mode = currentJournalMode || 'eng';
+      const now = Date.now();
+
+      // Сортируем основные списки
+      const sortFn = (a, b) => {
+        let valA, valB;
+
+        const sA = a.stats?.[mode] || { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 };
+        const sB = b.stats?.[mode] || { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 };
+        const pA = a.progress?.[mode] || { level: 1, nextReview: 0 };
+        const pB = b.progress?.[mode] || { level: 1, nextReview: 0 };
+
+        switch (criteria) {
+          case 'word':
+            return journalSortDir * a.word.localeCompare(b.word);
+          case 'level':
+            valA = pA.level;
+            valB = pB.level;
+            break;
+          case 'views':
+            valA = sA.views;
+            valB = sB.views;
+            break;
+          case 'days':
+            valA = a.timestampAdded || 0;
+            valB = b.timestampAdded || 0;
+            break;
+          case 'score0': valA = sA.scores[0]; valB = sB.scores[0]; break;
+          case 'score1': valA = sA.scores[1]; valB = sB.scores[1]; break;
+          case 'score2': valA = sA.scores[2]; valB = sB.scores[2]; break;
+          case 'score3': valA = sA.scores[3]; valB = sB.scores[3]; break;
+          case 'score4': valA = sA.scores[4]; valB = sB.scores[4]; break;
+          case 'diff':
+            valA = sA.totalEarned - sA.totalLost;
+            valB = sB.totalEarned - sB.totalLost;
+            break;
+          case 'status':
+            const getStatusScore = (w) => {
+              if (matchPool.some(mw => mw.word === w.word)) return 3;
+              if (w.progress?.[mode]?.nextReview <= now) return 2;
+              return 1;
+            };
+            valA = getStatusScore(a);
+            valB = getStatusScore(b);
+            break;
+          default:
+            return 0;
+        }
+
+        return (valB - valA) * journalSortDir;
+      };
+
+      if (currentJournalTab === 'learned') {
+        learnedWords.sort(sortFn);
+      } else {
+        finishedWords.sort(sortFn);
+      }
+
       renderJournal();
     }
 
