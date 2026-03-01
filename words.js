@@ -1,6 +1,6 @@
 /* --- БАЗА ДАННЫХ СЛОВ (Oxford 5000 - Часть 1) --- */
 const rawWords = [
-   {
+  {
     word: 'a, an',
     type: 'indefinite article',
     level: 'A1',
@@ -2370,4 +2370,3 @@ const rawWords = [
 
 const allWords = [...rawWords];
 let learnedWords = JSON.parse(localStorage.getItem('oxford_learned')) || [];
-
